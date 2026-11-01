@@ -42,3 +42,25 @@ services:
       # deployment, and compose supplies the container path.
       # See docs/UserDefinedUI.md.
       UI_TEMPLATES_DIR: "/app/data/ui_templates"
+
+  mcp:
+    image: ghcr.io/hkuds/lightrag:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      tags:
+        - ghcr.io/hkuds/lightrag:latest
+    command: ["lightrag-mcp", "--transport", "streamable-http", "--host", "0.0.0.0", "--port", "8001"]
+    ports:
+      - "${MCP_HOST:-0.0.0.0}:${MCP_PORT:-8001}:8001"
+    volumes:
+      - ./data/rag_storage:/app/data/rag_storage
+      - ./data/inputs:/app/data/inputs
+      - ./data/prompts:/app/data/prompts
+      - ./.env:/app/.env
+    environment:
+      WORKING_DIR: "/app/data/rag_storage"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10

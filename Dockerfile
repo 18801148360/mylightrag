@@ -46,7 +46,7 @@ COPY uv.lock .
 
 # Install base, API, and offline extras without the project to improve caching
 RUN --mount=type=cache,target=/root/.local/share/uv \
-    uv sync --frozen --no-dev --extra api --extra offline --no-install-project --no-editable
+    uv sync --frozen --no-dev --extra api --extra offline --extra mcp --no-install-project --no-editable
 
 # Copy project sources after dependency layer
 COPY lightrag/ ./lightrag/
@@ -56,7 +56,7 @@ COPY --from=frontend-builder /app/lightrag/api/webui ./lightrag/api/webui
 
 # Sync project in non-editable mode and ensure pip is available for runtime installs
 RUN --mount=type=cache,target=/root/.local/share/uv \
-    uv sync --frozen --no-dev --extra api --extra offline --no-editable \
+    uv sync --frozen --no-dev --extra api --extra offline --extra mcp --no-editable \
     && /app/.venv/bin/python -m ensurepip --upgrade
 
 # Prepare offline cache directory, pre-populate tiktoken data, and download the
@@ -97,7 +97,7 @@ ENV PATH=/app/.venv/bin:/root/.local/bin:$PATH
 # the wheels downloaded in the builder stage without adding an image layer.
 RUN --mount=type=cache,target=/root/.local/share/uv \
     --mount=type=bind,from=builder,source=/app/spacy_models,target=/tmp/spacy_models \
-    uv sync --frozen --no-dev --extra api --extra offline --no-editable \
+    uv sync --frozen --no-dev --extra api --extra offline --extra mcp --no-editable \
     && /app/.venv/bin/python -m ensurepip --upgrade \
     && /app/.venv/bin/python -m pip install --no-index --no-cache-dir \
         --find-links=/tmp/spacy_models zh_core_web_sm en_core_web_sm
